@@ -63,6 +63,7 @@ export class DdbCdcStack extends cdk.Stack {
 
     const addEol = new lambda.Function(this, 'addeol', {
       runtime: lambda.Runtime.NODEJS_LATEST,
+      memorySize: 512,
       architecture: lambda.Architecture.ARM_64,
       handler: 'index.handler',
       code: lambda.Code.fromAsset('code/lambda/addeol'),
