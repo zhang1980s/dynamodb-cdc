@@ -6,10 +6,11 @@ import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as glue from 'aws-cdk-lib/aws-glue';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as logs from 'aws-cdk-lib/aws-logs';
+import * as lambda from 'aws-cdk-lib/aws-lambda'
 import * as firehose from 'aws-cdk-lib/aws-kinesisfirehose';
 
 
-export class DynamodbCdcStack extends cdk.Stack {
+export class DdbCdcStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
@@ -38,7 +39,7 @@ export class DynamodbCdcStack extends cdk.Stack {
     const ddbcdcDatabase = new glue.CfnDatabase(this, 'ddbcdcdatabase', {
       catalogId: this.account,
       databaseInput: {
-        name: 'ddbcdcdatabase',
+        name: 'ddbcdc',
         description :'Glue database for DynamoDB CDC',
       }
     })
@@ -59,6 +60,22 @@ export class DynamodbCdcStack extends cdk.Stack {
     cdcStream.grantRead(ddbcdcFirehoseStreamRole);
     cdcBucket.grantWrite(ddbcdcFirehoseStreamRole);
     ddbcdclogGroup.grantWrite(ddbcdcFirehoseStreamRole);
+
+    const addEol = new lambda.Function(this, 'addeol', {
+      runtime: lambda.Runtime.NODEJS_LATEST,
+      architecture: lambda.Architecture.ARM_64,
+      handler: 'index.handler',
+      code: lambda.Code.fromAsset('code/lambda/addeol'),
+      timeout: cdk.Duration.minutes(1),
+
+    })
+
+    const addEolVersion = addEol.currentVersion;
+
+    const addEolAliasProd = new lambda.Alias(this, 'addeolprod', {
+      aliasName: 'Prod',
+      version: addEolVersion,
+    })
 
     // const ddbcdcFirehoseStream = new firehose.CfnDeliveryStream(this, 'ddbcdcfirehosestream',{
     //   deliveryStreamName: 'ddb-cdc-stream',
@@ -81,5 +98,7 @@ export class DynamodbCdcStack extends cdk.Stack {
     //     },
     //   }
     // })
+
+
   }
 }
