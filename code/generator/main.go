@@ -28,7 +28,8 @@ func main() {
 	recordsPerMillisecond := flag.Int("r", 10, "Number of records to write per millisecond")
 	flag.Parse()
 
-	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithRegion("ap-southeast-1"))
+	//	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithRegion("ap-southeast-1"))
+	cfg, err := config.LoadDefaultConfig(context.TODO())
 	if err != nil {
 		log.Fatalf("unable to load SDK config, %v", err)
 	}
