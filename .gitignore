@@ -2,6 +2,8 @@
 !jest.config.js
 *.d.ts
 node_modules
+!code/lambda/addeol/*.js
+!code/lambda/addeol/*.ts
 
 # CDK asset staging directory
 .cdk.staging
