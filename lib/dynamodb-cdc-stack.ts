@@ -15,13 +15,13 @@ export class DdbCdcStack extends cdk.Stack {
     super(scope, id, props);
 
     // Create cdcBucket
-    const cdcBucket = new s3.Bucket(this, 'ddb-cdc-bucket',{
+    const cdcBucket = new s3.Bucket(this, 'ddbcdcbucket',{
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       autoDeleteObjects: true,
     })
 
     // Create cdcStream
-    const cdcStream = new kinesis.Stream(this, 'cdcStream', {
+    const cdcStream = new kinesis.Stream(this, 'cdcstream', {
       streamName: 'cdcstream',
       removalPolicy: cdk.RemovalPolicy.DESTROY
     })
@@ -39,27 +39,27 @@ export class DdbCdcStack extends cdk.Stack {
     const ddbcdcDatabase = new glue.CfnDatabase(this, 'ddbcdcdatabase', {
       catalogId: this.account,
       databaseInput: {
-        name: 'ddbcdc',
+        name: 'ddbcdcdatabase',
         description :'Glue database for DynamoDB CDC',
       }
     })
 
-    const ddbcdcFirehoseStreamRole = new iam.Role(this, 'ddbcdcfirehosestreamrole',{
-      assumedBy: new iam.ServicePrincipal('firehose.amazonaws.com')
-    });
-
-    const ddbcdclogGroup = new logs.LogGroup(this, 'ddbcdcfirehoseloggroup', {
-      retention: logs.RetentionDays.FIVE_DAYS,
-      removalPolicy: cdk.RemovalPolicy.DESTROY
-    })
-
-    const ddbcdclogStream = new logs.LogStream(this, 'FirehoseLogStream',{
-      logGroup: ddbcdclogGroup,
-    })
-
-    cdcStream.grantRead(ddbcdcFirehoseStreamRole);
-    cdcBucket.grantWrite(ddbcdcFirehoseStreamRole);
-    ddbcdclogGroup.grantWrite(ddbcdcFirehoseStreamRole);
+    // const ddbcdcFirehoseStreamRole = new iam.Role(this, 'ddbcdcfirehosestreamrole',{
+    //   assumedBy: new iam.ServicePrincipal('firehose.amazonaws.com')
+    // });
+    //
+    // const ddbcdclogGroup = new logs.LogGroup(this, 'ddbcdcfirehoseloggroup', {
+    //   retention: logs.RetentionDays.FIVE_DAYS,
+    //   removalPolicy: cdk.RemovalPolicy.DESTROY
+    // })
+    //
+    // const ddbcdclogStream = new logs.LogStream(this, 'FirehoseLogStream',{
+    //   logGroup: ddbcdclogGroup,
+    // })
+    //
+    // cdcStream.grantRead(ddbcdcFirehoseStreamRole);
+    // cdcBucket.grantWrite(ddbcdcFirehoseStreamRole);
+    // ddbcdclogGroup.grantWrite(ddbcdcFirehoseStreamRole);
 
     const addEol = new lambda.Function(this, 'addeol', {
       runtime: lambda.Runtime.NODEJS_LATEST,
